@@ -1,13 +1,13 @@
 ## Install
 
 ```
-$ npm i wikidataNPM
+$ npm i wikidatanpm
 ```
 
 ## Usage
 
 ```
-const wkd = require('wikidataNPM');
+const wkd = require('wikidatanpm');
 ```
 
 ```

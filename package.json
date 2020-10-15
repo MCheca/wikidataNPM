@@ -1,0 +1,29 @@
+{
+  "name": "wikidatanpm",
+  "version": "1.0.0",
+  "description": "Make simple queries to Wikidata without having to use Sparql",
+  "main": "index.js",
+  "scripts": {
+    "start": "node main.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "wikidata",
+    "sparql",
+    "MediaWiki",
+    "wikibase"
+  ],
+  "author": "Marcos Checa Pérez",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.20.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/MCheca/wikidataNPM.git"
+  },
+  "bugs": {
+    "url": "https://github.com/MCheca/wikidataNPM/issues"
+  },
+  "homepage": "https://github.com/MCheca/wikidataNPM#readme"
+}

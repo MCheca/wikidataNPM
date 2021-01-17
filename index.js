@@ -151,6 +151,29 @@ const getAuthorMovement = (id, language) => {
         );
 };
 
+const getAwards = (id, language) => {
+    const lang = language || 'es';
+    const query = `
+    SELECT ?awardsLabel
+    WHERE 
+    {
+      VALUES ?item { wd:${id} }
+      ?item wdt:P166 ?awards
+      
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],${lang}". }
+    }
+    `;
+
+    return axios.get(baseURL + encodeURI(query)).then((res) => {
+        const awards = res.data.results.bindings;
+        const awardsList = [];
+        for (const award of awards) {
+            awardsList.push(award.awardsLabel.value);
+        }
+        return awardsList;
+    });
+};
+
 const getPersonImage = (id, language) => {
     const lang = language || 'es';
     const query = `
@@ -166,7 +189,7 @@ const getPersonImage = (id, language) => {
 
     return axios
         .get(baseURL + encodeURI(query))
-        .then((res) => res.data.results.bindings[0].image.value);
+        .then((res) => res.data.results.bindings[0]?.image.value);
 };
 
 const getPersonBirth = (id, language) => {
@@ -185,13 +208,44 @@ const getPersonBirth = (id, language) => {
     `;
     return axios.get(baseURL + encodeURI(query)).then((res) => {
         return {
-            name: res.data.results.bindings[0].itemLabel.value,
-            date: res.data.results.bindings[0].date.value,
-            place: res.data.results.bindings[0].placeLabel.value,
-            placeId: res.data.results.bindings[0].place.value.replace(
+            name: res.data.results.bindings[0]?.itemLabel.value,
+            date: res.data.results.bindings[0]?.date.value,
+            place: res.data.results.bindings[0]?.placeLabel.value,
+            placeId: res.data.results.bindings[0]?.place.value.replace(
                 'http://www.wikidata.org/entity/',
                 '',
             ),
+        };
+    });
+};
+
+const getPersonFamily = (id, language) => {
+    const lang = language || 'es';
+    const query = `
+    SELECT ?item ?itemLabel ?dadLabel ?momLabel ?spouseLabel ?childrenLabel ?childrenNum
+    WHERE
+    {
+        ?item wdt:P31 wd:Q5 .
+        VALUES ?item { wd:${id} } . 
+        OPTIONAL {?item wdt:P22 ?dad} .
+        OPTIONAL{?item wdt:P25 ?mom} .
+        OPTIONAL{?item wdt:P26 ?spouse} .
+        OPTIONAL{?item wdt:P40 ?children} .
+        OPTIONAL{?item wdt:P1971 ?childrenNum} .
+
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "${lang}". }
+    }
+    `;
+    return axios.get(baseURL + encodeURI(query)).then((res) => {
+        return {
+            name: res.data.results.bindings[0]?.itemLabel?.value,
+            dad: res.data.results.bindings[0]?.dadLabel?.value,
+            mom: res.data.results.bindings[0]?.momLabel?.value,
+            spouse: res.data.results.bindings[0]?.spouseLabel?.value,
+            childrenNum:
+                res.data.results.bindings[0]?.childrenNum?.value,
+            children:
+                res.data.results.bindings[0]?.childrenLabel?.value,
         };
     });
 };
@@ -229,10 +283,11 @@ const getPersonDeath = (id, language) => {
                         ? res.data.results.bindings[0].placeLabel
                               .value
                         : null,
-                placeId: res.data.results.bindings[0].place.value.replace(
-                    'http://www.wikidata.org/entity/',
-                    '',
-                ),
+                placeId:
+                    res?.data?.results?.bindings[0]?.place?.value.replace(
+                        'http://www.wikidata.org/entity/',
+                        '',
+                    ) || null,
                 cause:
                     res.data.results.bindings[0].causeLabel &&
                     res.data.results.bindings[0].causeLabel.value
@@ -318,7 +373,9 @@ const cityPopulation = (city) => {
     `;
     return axios
         .get(baseURL + encodeURI(query))
-        .then((res) => res.data.results.bindings[0].population.value);
+        .then(
+            (res) => res.data.results.bindings[0]?.population.value,
+        );
 };
 
 // Actually only works for Spain
@@ -333,7 +390,7 @@ const cityMap = (city) => {
     `;
     return axios
         .get(baseURL + encodeURI(query))
-        .then((res) => res.data.results.bindings[0].map.value);
+        .then((res) => res.data.results.bindings[0]?.map.value);
 };
 
 // Actually only works for Spain
@@ -469,7 +526,6 @@ const getTwitterAccount = (person) => {
         }
     }
     `;
-    console.log(query);
     return axios.get(baseURL + encodeURI(query)).then((res) => {
         return {
             twitter: res.data.results.bindings[0].twitter
@@ -488,8 +544,10 @@ module.exports = {
     getAuthorPseudonym,
     getAuthorNickname,
     getAuthorMovement,
+    getAwards,
     getPersonImage,
     getPersonBirth,
+    getPersonFamily,
     getPersonDeath,
     getPersonSignature,
     getTwitterAccount,

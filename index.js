@@ -135,8 +135,12 @@ const getAuthorMovement = (id, language, country) => {
     {
       VALUES ?item { wd:${id} }
       ?item wdt:P135 ?movement
-      ${country ? `wdt:P27 ?country 
-      FILTER(?country = wd:${country}).`:''}
+      ${
+          country
+              ? `wdt:P27 ?country 
+      FILTER(?country = wd:${country}).`
+              : ''
+      }
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],${lang}". }
     }
     `;
@@ -489,16 +493,21 @@ const getAuthorsByCity = async (country, language) => {
 
 const authorsByMovement = (movement, language, countryId) => {
     const lang = language || 'es';
-    
+
     const query = `
     SELECT ?author ?authorLabel
     WHERE 
     {
       ?author wdt:P31 wd:Q5 .  
       ?author wdt:P135 wd:${movement} ;
-      ${countryId ? `wdt:P27 ?country FILTER(?country = wd:${'Q29'}).` : ''}
+      ${
+          countryId
+              ? `wdt:P27 ?country FILTER(?country = wd:${'Q29'}).`
+              : ''
+      }
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],${lang}". }
     }
+    ORDER BY DESC(?author)
     `;
     return axios.get(baseURL + encodeURI(query)).then((res) => {
         const authors = res.data.results.bindings;

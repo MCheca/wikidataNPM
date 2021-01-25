@@ -439,7 +439,7 @@ const getAuthorsByCountry = async (country, language) => {
     const lang = language || 'es';
     const countryId = await getWikiId(country, lang);
     const query = `
-    SELECT distinct ?id ?autor ?label
+    SELECT distinct ?autor ?label
     WHERE {
         ?autor wdt:P2799 ?id .
         ?autor wdt:P27 wd:${country} .

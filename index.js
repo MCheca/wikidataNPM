@@ -94,16 +94,13 @@ const getBookCharacters = (id, language) => {
         const characters = res.data.results.bindings;
         const charactersList = [];
         for (const character of characters) {
-            let publication = book.firstPublication
-                ? book.firstPublication.value
-                : null;
-                charactersList.push({
+            charactersList.push({
                 name: character.charactersLabel.value,
             });
         }
         return charactersList;
     });
-}
+};
 
 const getAuthorPseudonym = (id, language) => {
     const lang = language || 'es';

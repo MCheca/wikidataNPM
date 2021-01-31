@@ -102,6 +102,23 @@ const getBookCharacters = (id, language) => {
     });
 };
 
+const getBookAuthor = (id, language) => {
+    const lang = language || 'es';
+    const query = `
+    SELECT distinct ?authorLabel
+    WHERE 
+    {
+      VALUES ?item { wd:${id} }
+      ?item wdt:P50 ?author
+
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],${lang}". }
+    }`;
+
+    return axios.get(baseURL + encodeURI(query)).then((res) => {
+        res.data.results.bindings[0]?.authorLabel?.value;
+    });
+};
+
 const getAuthorPseudonym = (id, language) => {
     const lang = language || 'es';
     const query = `
@@ -575,6 +592,7 @@ module.exports = {
     getAuthorBooks,
     getAuthorNotableWork,
     getBookCharacters,
+    getBookAuthor,
     getAuthorPseudonym,
     getAuthorNickname,
     getAuthorMovement,

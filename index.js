@@ -79,6 +79,32 @@ const getAuthorNotableWork = (id, limit, language) => {
     });
 };
 
+const getBookCharacters = (id, language) => {
+    const lang = language || 'es';
+    const query = `
+    SELECT distinct ?charactersLabel
+    WHERE 
+    {
+      VALUES ?item { wd:${id} }
+      ?item wdt:P674 ?characters
+      
+      SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],${lang}". }
+    }`;
+    return axios.get(baseURL + encodeURI(query)).then((res) => {
+        const characters = res.data.results.bindings;
+        const charactersList = [];
+        for (const character of characters) {
+            let publication = book.firstPublication
+                ? book.firstPublication.value
+                : null;
+                charactersList.push({
+                name: character.charactersLabel.value,
+            });
+        }
+        return charactersList;
+    });
+}
+
 const getAuthorPseudonym = (id, language) => {
     const lang = language || 'es';
     const query = `
@@ -551,6 +577,7 @@ const getTwitterAccount = (person) => {
 module.exports = {
     getAuthorBooks,
     getAuthorNotableWork,
+    getBookCharacters,
     getAuthorPseudonym,
     getAuthorNickname,
     getAuthorMovement,

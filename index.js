@@ -114,9 +114,11 @@ const getBookAuthor = (id, language) => {
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],${lang}". }
     }`;
 
-    return axios.get(baseURL + encodeURI(query)).then((res) => {
-        res.data.results.bindings[0]?.authorLabel?.value;
-    });
+    return axios
+        .get(baseURL + encodeURI(query))
+        .then(
+            (res) => res.data.results.bindings[0]?.authorLabel?.value,
+        );
 };
 
 const getAuthorPseudonym = (id, language) => {

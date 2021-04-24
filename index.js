@@ -236,7 +236,7 @@ const getPersonImage = (id, language) => {
 
     return axios
         .get(baseURL + encodeURI(query))
-        .then((res) => res.data.results.bindings[0].image.value);
+        .then((res) => res.data.results.bindings[0]?.image.value);
 };
 
 const getPersonBirth = (id, language) => {

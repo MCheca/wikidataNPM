@@ -392,7 +392,7 @@ const getWikiId = (search, language) => {
     `;
 
     return axios.get(baseURL + encodeURI(query)).then((res, err) => {
-        if (err) return 'not found';
+        if (err) return null;
 
         return res &&
             res.data &&
@@ -404,7 +404,7 @@ const getWikiId = (search, language) => {
                   'http://www.wikidata.org/entity/',
                   '',
               )
-            : 'Not found';
+            : null;
     });
 };
 
@@ -452,7 +452,7 @@ const cityFlag = (city) => {
     `;
     return axios
         .get(baseURL + encodeURI(query))
-        .then((res) => res.data.results.bindings[0].flag.value);
+        .then((res) => res.data.results.bindings[0]?.flag.value);
 };
 
 const countryCapital = (countryId, language) => {

@@ -476,7 +476,7 @@ const countryCapital = (countryId, language) => {
     });
 };
 
-const getAuthorsByCountry = async (country, language, gender) => {
+const getAuthorsByCountry = async (country, gender, language) => {
     const lang = language || 'es';
     const query = `
     SELECT distinct ?author ?label
@@ -514,7 +514,7 @@ const getAuthorsByCountry = async (country, language, gender) => {
     });
 };
 
-const getAuthorsByCity = async (country, language, gender) => {
+const getAuthorsByCity = async (country, gender, language) => {
     const lang = language || 'es';
     const cityId = await getWikiId(country, lang);
     const query = `
@@ -554,7 +554,7 @@ const getAuthorsByCity = async (country, language, gender) => {
     });
 };
 
-const authorsByMovement = (movement, language, gender, countryId) => {
+const authorsByMovement = (movement, gender, language, countryId) => {
     const lang = language || 'es';
 
     const query = `

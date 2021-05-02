@@ -440,7 +440,6 @@ const cityMap = (city) => {
         .then((res) => res.data.results.bindings[0]?.map.value);
 };
 
-// Actually only works for Spain
 const cityFlag = (city) => {
     const query = `
     SELECT ?flag
@@ -477,15 +476,25 @@ const countryCapital = (countryId, language) => {
     });
 };
 
-const getAuthorsByCountry = async (country, language) => {
+const getAuthorsByCountry = async (country, language, gender) => {
     const lang = language || 'es';
-    const countryId = await getWikiId(country, lang);
     const query = `
-    SELECT distinct ?autor ?label
+    SELECT distinct ?author ?label
     WHERE {
-        ?autor wdt:P2799 ?id .
-        ?autor wdt:P27 wd:${country} .
-        ?autor rdfs:label ?label.
+        ?author wdt:P2799 ?id .
+        ${
+            gender && (gender === 'female' || gender === 'male')
+                ? `?author wdt:P21 wd:${
+                      gender === 'female' ? 'Q6581072' : 'Q6581097'
+                  } .`
+                : ''
+        }
+        ?author wdt:P27 wd:${country} .
+        ?author wdt:P106 ?occupation .
+  
+        FILTER ( ?occupation = wd:Q28389 || ?occupation = wd:Q4853732 || ?occupation = wd:Q482980 || ?occupation = wd:Q49757 || ?occupation = wd:Q6625963 || ?occupation = wd:Q214917 || ?occupation = wd:Q36180 || ?occupation = wd:Q11774202) .
+ 
+        ?author rdfs:label ?label.
         FILTER (lang(?label) = '${lang}').
     }
     `;
@@ -495,7 +504,7 @@ const getAuthorsByCountry = async (country, language) => {
         for (const author of authors) {
             authorsList.push({
                 name: author.label.value,
-                id: author.autor.value.replace(
+                id: author.author.value.replace(
                     'http://www.wikidata.org/entity/',
                     '',
                 ),
@@ -505,15 +514,27 @@ const getAuthorsByCountry = async (country, language) => {
     });
 };
 
-const getAuthorsByCity = async (country, language) => {
+const getAuthorsByCity = async (country, language, gender) => {
     const lang = language || 'es';
     const cityId = await getWikiId(country, lang);
     const query = `
-    SELECT distinct ?id ?autor ?label
+    SELECT distinct ?id ?author ?label
     WHERE {
-        ?autor wdt:P2799 ?id .
-        ?autor wdt:P19 wd:${cityId} .
-        ?autor rdfs:label ?label.
+        ?author wdt:P31 wd:Q5 .
+        ${
+            gender && (gender === 'female' || gender === 'male')
+                ? `?author wdt:P21 wd:${
+                      gender === 'female' ? 'Q6581072' : 'Q6581097'
+                  } .`
+                : ''
+        }
+        ?author wdt:P2799 ?id .
+        ?author wdt:P19 wd:${cityId} .
+        ?author wdt:P106 ?occupation .
+  
+        FILTER ( ?occupation = wd:Q28389 || ?occupation = wd:Q4853732 || ?occupation = wd:Q482980 || ?occupation = wd:Q49757 || ?occupation = wd:Q6625963 || ?occupation = wd:Q214917 || ?occupation = wd:Q36180 || ?occupation = wd:Q11774202) .
+ 
+        ?author rdfs:label ?label.
         FILTER (lang(?label) = '${lang}').
     }
     `;
@@ -523,7 +544,7 @@ const getAuthorsByCity = async (country, language) => {
         for (const author of authors) {
             authorsList.push({
                 name: author.label.value,
-                id: author.autor.value.replace(
+                id: author.author.value.replace(
                     'http://www.wikidata.org/entity/',
                     '',
                 ),
@@ -533,7 +554,7 @@ const getAuthorsByCity = async (country, language) => {
     });
 };
 
-const authorsByMovement = (movement, language, countryId) => {
+const authorsByMovement = (movement, language, gender, countryId) => {
     const lang = language || 'es';
 
     const query = `
@@ -541,10 +562,18 @@ const authorsByMovement = (movement, language, countryId) => {
     WHERE 
     {
       ?author wdt:P31 wd:Q5 .  
+      ${
+          gender && (gender === 'female' || gender === 'male')
+              ? `?author wdt:P21 wd:${
+                    gender === 'female' ? 'Q6581072' : 'Q6581097'
+                } .`
+              : ''
+      }
       ?author wdt:P135 wd:${movement} ;
       ${
           countryId
-              ? `wdt:P27 ?country FILTER(?country = wd:${'Q29'}).`
+              ? `wdt:P27 ?country
+                FILTER(?country = wd:${countryId}).`
               : ''
       }
       SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],${lang}". }

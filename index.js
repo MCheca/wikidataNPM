@@ -554,7 +554,7 @@ const getAuthorsByCity = async (country, gender, language) => {
     });
 };
 
-const authorsByMovement = (movement, gender, language, countryId) => {
+const authorsByMovement = (movement, gender, countryId, language) => {
     const lang = language || 'es';
 
     const query = `

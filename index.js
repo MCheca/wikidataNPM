@@ -349,12 +349,17 @@ const getPersonDeath = (id, language) => {
 const getPersonSignature = (id, language) => {
     const lang = language || 'es';
     const query = `
-    SELECT ?item ?itemLabel ?signature
+    SELECT ?item ?itemLabel ?thumb ?signature
     WHERE
     {
         ?item wdt:P31 wd:Q5 .
         VALUES ?item { wd:${id} }
         ?item wdt:P109 ?signature .
+
+        BIND(REPLACE(wikibase:decodeUri(STR(?signature)), "http://commons.wikimedia.org/wiki/Special:FilePath/", "") as ?fileName) .
+        BIND(REPLACE(?fileName, " ", "_") as ?safeFileName)
+        BIND(MD5(?safeFileName) as ?fileNameMD5) .
+        BIND(CONCAT("https://upload.wikimedia.org/wikipedia/commons/thumb/", SUBSTR(?fileNameMD5, 1, 1), "/", SUBSTR(?fileNameMD5, 1, 2), "/", ?safeFileName, "/650px-", ?safeFileName, ".png") as ?thumb)
 
         SERVICE wikibase:label { bd:serviceParam wikibase:language "${lang}". }
     }
@@ -364,8 +369,12 @@ const getPersonSignature = (id, language) => {
             res.data.results.bindings &&
             res.data.results.bindings.length > 0
         )
-            return res.data.results.bindings[0].signature.value;
-        else return 'No hay firma';
+            return {
+                thumb: res.data.results.bindings[0]?.thumb.value,
+                signature:
+                    res.data.results.bindings[0].signature.value,
+            };
+        else return null;
     });
 };
 

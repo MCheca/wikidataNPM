@@ -2,6 +2,38 @@ const axios = require('axios');
 const baseURL =
     'https://query.wikidata.org/sparql?format=json&query=';
 
+const getRandomBooks = (amount, genre, language) => {
+    const lang = language || 'es';
+
+    const query = `
+    SELECT ?item ?itemLabel ?genreLabel ?authorLabel WHERE {
+        ?item wdt:P31 ?instance .
+        ?item wdt:P407 wd:Q1321 .
+        ?item wdt:P50 ?author .
+        ?item wdt:P136 ?genre .
+        FILTER(${
+            genre ? `?genre = wd:${genre} ||` : ''
+        } ?instance = wd:Q8261 || ?instance = wd:Q7725634)
+        BIND(SHA512(CONCAT(STR(RAND()), STR(?item))) AS ?random) .
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE], ${lang}" . }
+     } ORDER BY ?random
+     LIMIT ${amount}
+     # Random clean wikidata cache ${Math.random().toString(36)}`;
+
+    return axios.get(baseURL + encodeURI(query)).then((res) => {
+        const books = res.data.results.bindings;
+        const booksList = [];
+        for (const book of books) {
+            booksList.push({
+                name: book.itemLabel.value,
+                author: book.authorLabel.value,
+                genre: book.genreLabel.value,
+            });
+        }
+        return booksList;
+    });
+};
+
 const getAuthorBooks = (authorId, limit, language) => {
     const lang = language || 'es';
     const query = `
@@ -629,6 +661,7 @@ const getTwitterAccount = (person) => {
 };
 
 module.exports = {
+    getRandomBooks,
     getAuthorBooks,
     getAuthorNotableWork,
     getBookCharacters,

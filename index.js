@@ -11,9 +11,9 @@ const getRandomBooks = (amount, genre, language) => {
         ?item wdt:P407 wd:Q1321 .
         ?item wdt:P50 ?author .
         ?item wdt:P136 ?genre .
-        FILTER(${
-            genre ? `?genre = wd:${genre} ||` : ''
-        } ?instance = wd:Q8261 || ?instance = wd:Q7725634)
+       
+        ${genre ? `FILTER( ?genre = wd:${genre}) .` : ''}
+        FILTER(?instance = wd:Q8261 || ?instance = wd:Q7725634)
         BIND(SHA512(CONCAT(STR(RAND()), STR(?item))) AS ?random) .
         SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE], ${lang}" . }
      } ORDER BY ?random

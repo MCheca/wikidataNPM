@@ -274,11 +274,13 @@ const getPersonImage = (id, language) => {
 const getPersonBirth = (id, language) => {
     const lang = language || 'es';
     const query = `
-    SELECT ?item ?itemLabel ?place ?placeLabel ?date
+    SELECT ?item ?itemLabel ?place ?placeLabel ?date ?timeprecision
     WHERE
     {
         ?item wdt:P31 wd:Q5 .
-        VALUES ?item { wd:${id} } . 
+        VALUES ?item { wd:${id} } .
+        ?item p:P569/psv:P569 ?timenode .
+        ?timenode wikibase:timePrecision ?timeprecision. 
         ?item wdt:P569 ?date .
         ?item wdt:P19 ?place .
 
@@ -289,11 +291,14 @@ const getPersonBirth = (id, language) => {
         return {
             name: res.data.results.bindings[0]?.itemLabel.value,
             date: res.data.results.bindings[0]?.date.value,
+            datePrecision:
+                res.data.results.bindings[0]?.timeprecision.value,
             place: res.data.results.bindings[0]?.placeLabel.value,
-            placeId: res.data.results.bindings[0]?.place.value.replace(
-                'http://www.wikidata.org/entity/',
-                '',
-            ),
+            placeId:
+                res.data.results.bindings[0]?.place.value.replace(
+                    'http://www.wikidata.org/entity/',
+                    '',
+                ),
         };
     });
 };
@@ -332,11 +337,13 @@ const getPersonFamily = (id, language) => {
 const getPersonDeath = (id, language) => {
     const lang = language || 'es';
     const query = `
-    SELECT ?item ?itemLabel ?place ?placeLabel ?date ?causeLabel
+    SELECT ?item ?itemLabel ?place ?placeLabel ?date ?timeprecision ?causeLabel 
     WHERE
     {
         ?item wdt:P31 wd:Q5 .
         VALUES ?item { wd:${id} }
+        ?item p:P570/psv:P570 ?timenode .
+        ?timenode wikibase:timePrecision ?timeprecision.
         OPTIONAL { ?item wdt:P20 ?place .}
         OPTIONAL { ?item wdt:P570 ?date .}
         OPTIONAL { ?item wdt:P1196 ?cause }
@@ -352,29 +359,20 @@ const getPersonDeath = (id, language) => {
             return {
                 name: res.data.results.bindings[0].itemLabel.value,
                 date:
-                    res.data.results.bindings[0].date &&
-                    res.data.results.bindings[0].date.value
-                        ? res.data.results.bindings[0].date.value
-                        : null,
+                    res.data.results.bindings[0]?.date.value || null,
                 place:
-                    res.data.results.bindings[0].placeLabel &&
-                    res.data.results.bindings[0].placeLabel.value
-                        ? res.data.results.bindings[0].placeLabel
-                              .value
-                        : null,
+                    res.data.results.bindings[0]?.placeLabel.value ||
+                    null,
                 placeId:
                     res?.data?.results?.bindings[0]?.place?.value.replace(
                         'http://www.wikidata.org/entity/',
                         '',
                     ) || null,
                 cause:
-                    res.data.results.bindings[0].causeLabel &&
-                    res.data.results.bindings[0].causeLabel.value
-                        ? res.data.results.bindings[0].causeLabel
-                              .value
-                        : null,
+                    res.data.results.bindings[0]?.causeLabel.value ||
+                    null,
             };
-        else return 'Sigue vivo';
+        else return 'Still alive';
     });
 };
 

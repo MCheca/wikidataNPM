@@ -347,6 +347,7 @@ const getPersonDeath = (id, language) => {
         OPTIONAL { ?item wdt:P20 ?place .}
         OPTIONAL { ?item wdt:P570 ?date .}
         OPTIONAL { ?item wdt:P1196 ?cause }
+        OPTIONAL { ?item wdt:P509 ?cause }
 
         SERVICE wikibase:label { bd:serviceParam wikibase:language "${lang}". }
     }
@@ -360,6 +361,8 @@ const getPersonDeath = (id, language) => {
                 name: res.data.results.bindings[0].itemLabel.value,
                 date:
                     res.data.results.bindings[0]?.date.value || null,
+                datePrecision:
+                    res.data.results.bindings[0]?.timeprecision.value,
                 place:
                     res.data.results.bindings[0]?.placeLabel.value ||
                     null,
@@ -369,7 +372,7 @@ const getPersonDeath = (id, language) => {
                         '',
                     ) || null,
                 cause:
-                    res.data.results.bindings[0]?.causeLabel.value ||
+                    res.data.results.bindings[0]?.causeLabel?.value ||
                     null,
             };
         else return 'Still alive';

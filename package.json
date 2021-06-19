@@ -1,6 +1,6 @@
 {
     "name": "wikidatanpm",
-    "version": "1.0.24",
+    "version": "1.0.25",
     "description": "Make simple queries to Wikidata without having to use Sparql",
     "main": "index.js",
     "scripts": {
